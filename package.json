@@ -1,0 +1,21 @@
+{
+  "name": "hackernews-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "graphql": "^15.3.0",
+    "graphql-yoga": "^1.18.3"
+  },
+  "devDependencies": {
+    "@playlyfe/gql": "^2.6.2",
+    "eslint": "^7.9.0",
+    "prettier": "^2.1.2"
+  }
+}
