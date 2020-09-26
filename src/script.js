@@ -1,5 +1,5 @@
 // 1
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
 
 // 2
 const prisma = new PrismaClient();
