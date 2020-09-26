@@ -11,6 +11,7 @@ const post = async (parent, args, context, info) => {
       postedBy: { connect: { id: userId } },
     },
   });
+  context.pubsub.publish("NEW_LINK", newLink);
   return newLink;
 };
 
@@ -22,7 +23,11 @@ const updateLink = async (parent, args, context, info) => {
     },
   });
   if (!link) {
-    throw new Error("No such user found");
+    throw new Error("No such link found");
+  }
+
+  if (link.userId != userId) {
+    throw new Error("Current User is not Authorized to make this change.");
   }
 
   const updatedLink = {};
@@ -43,9 +48,11 @@ const deleteLink = async (parent, args, context, info) => {
     },
   });
   if (!link) {
-    throw new Error("No such user found");
+    throw new Error("No such link found");
   }
-
+  if (link.userId != userId) {
+    throw new Error("Current User is not Authorized to make this change.");
+  }
   return await context.prisma.link.delete({
     where: {
       id: parseInt(args.id),
@@ -89,12 +96,40 @@ const login = async (parent, args, context, info) => {
   };
 };
 
+const vote = async (parent, args, context, info) => {
+  const userId = getUserId(context);
+
+  const vote = await context.prisma.vote.findOne({
+    where: {
+      linkId_userId: {
+        linkId: Number(args.linkId),
+        userId: userId,
+      },
+    },
+  });
+
+  if (Boolean(vote)) {
+    throw new Error(`Already voted for link: ${args.linkId}`);
+  }
+
+  const newVote = context.prisma.vote.create({
+    data: {
+      user: { connect: { id: userId } },
+      link: { connect: { id: Number(args.linkId) } },
+    },
+  });
+  context.pubsub.publish("NEW_VOTE", newVote);
+
+  return newVote;
+};
+
 const Mutation = {
-  post: post,
-  updateLink: updateLink,
-  deleteLink: deleteLink,
-  login: login,
-  signup: signup,
+  post,
+  updateLink,
+  deleteLink,
+  login,
+  signup,
+  vote,
 };
 
 module.exports = Mutation;
